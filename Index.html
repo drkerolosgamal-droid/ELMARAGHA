@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{--green:#166534;--green2:#15803d;--ink:#17221b;--muted:#66736b;--paper:#f4f7f4;--line:#dce5dd;--red:#b91c1c}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Tahoma,Arial,sans-serif;line-height:1.7}
+    header{background:linear-gradient(120deg,#14532d,#15803d);color:#fff;padding:22px max(18px,calc((100% - 1100px)/2));}
+    header h1{margin:0;font-size:clamp(24px,4vw,36px)}header p{margin:4px 0 0;color:#e1f4e5}
+    nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}button,.btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:bold;cursor:pointer;background:var(--green);color:#fff}
+    nav button{background:#ffffff20;border:1px solid #ffffff40}nav button:hover{background:#ffffff35}.nav-group{position:relative;display:inline-block}.nav-dropdown{display:none;position:absolute;z-index:20;top:100%;right:0;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px;box-shadow:0 8px 22px #0002}.nav-group:hover .nav-dropdown,.nav-group:focus-within .nav-dropdown{display:block}.nav-dropdown button{display:block;width:100%;text-align:right;background:#fff;color:var(--ink);border:0;border-radius:7px}.nav-dropdown button:hover{background:#e8efe9}.nav-group>button:after{content:" ▾"}
+    main{max-width:1100px;margin:22px auto;padding:0 16px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+    .card{background:white;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 3px 12px #15391d08}
+    .card h2,.card h3{margin-top:0}.muted{color:var(--muted)}.pill{display:inline-block;background:#e5f4e8;color:#166534;border-radius:999px;padding:3px 10px;font-size:13px}
+    input,textarea,select{width:100%;padding:11px;border:1px solid #cbd5ce;border-radius:9px;font:inherit;margin:5px 0 12px;background:#fff}
+    textarea{min-height:110px}label{font-weight:bold;font-size:14px}.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+    .hidden{display:none!important}.actions{display:flex;gap:8px;flex-wrap:wrap}.secondary{background:#e8efe9;color:#183b24}.danger{background:#b91c1c}
+    .notice{padding:12px 14px;border-radius:10px;margin:12px 0;background:#e8f4eb;color:#14532d}.error{background:#fee2e2;color:#991b1b}
+    .item{padding:13px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}.item h3{margin:0 0 5px}.empty{padding:25px;text-align:center;color:var(--muted)}
+    footer{text-align:center;padding:30px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+<header>
+  <h1 id="siteTitle">أهله المراغة</h1>
+  <p id="tagline">دليلك للأخبار والخدمات في المراغة</p>
+  <nav>
+    <button onclick="showPage('home')">الرئيسية</button>
+    <button onclick="showPage('news')">الأخبار</button>
+    <button onclick="showPage('services')">الخدمات</button>
+    <button onclick="showPage('directory')">الدليل الطبي</button>
+    <button onclick="showPage('jobs')">الوظائف</button>
+    <button onclick="showPage('representatives')">نواب المراغة</button>
+    <button onclick="showPage('donations')">التبرعات</button>
+    <button onclick="showPage('notifications')" id="notificationsNav">الإشعارات</button>
+    <span id="dynamicMenus" style="display:contents"></span>
+    <button onclick="showPage('account')" id="accountNav">دخول / حساب جديد</button>
+    <button onclick="showPage('admin')" id="adminNav" class="hidden">لوحة الإدارة</button>
+  </nav>
+</header>
+<main>
+  <div id="message" class="hidden"></div>
+  <section id="homePage">
+    <div class="card" style="margin-bottom:16px">
+      <h2>مرحبًا بكم في أهله المراغة</h2><label for="themeChoice">ثيم الموقع</label><select id="themeChoice" onchange="applyTheme(this.value)"><option value="green">أخضر</option><option value="blue">أزرق إخباري</option><option value="warm">دافئ</option><option value="dark">داكن</option></select>
+      <p>بوابة محلية تجمع الأخبار والخدمات والإعلانات المفيدة لأهالي المراغة والقرى التابعة لها.</p>
+      <div class="row">
+        <input id="searchBox" placeholder="ابحث عن خبر أو خدمة أو عيادة..." oninput="renderSearch()">
+        <button onclick="showPage('news')">تصفح آخر الأخبار</button>
+      </div>
+    </div>
+    <h2>آخر الأخبار</h2><div id="homeNews" class="grid"></div>
+    <h2>أقسام الدليل</h2>
+    <div class="grid">
+      <div class="card"><h3>الخدمات العامة</h3><p class="muted">خدمات ومرافق وأرقام تهم الأهالي.</p><button onclick="showPage('services')">عرض الخدمات</button></div>
+      <div class="card"><h3>العيادات والمستشفيات والصيدليات</h3><p class="muted">دليل صحي محلي قابل للتحديث.</p><button onclick="showPage('directory')">عرض الدليل الطبي</button></div>
+      <div class="card"><h3>الوظائف</h3><p class="muted">فرص العمل ومعلومات التقديم.</p><button onclick="showPage('jobs')">عرض الوظائف</button></div>
+      <div class="card"><h3>النواب والحيز العمراني</h3><p class="muted">معلومات عامة وروابط للمصادر الرسمية.</p><button onclick="showPage('more')">عرض الأقسام</button></div>
+    </div>
+  </section>
+
+  <section id="listPage" class="hidden"><div class="card"><h2 id="listTitle"></h2><div id="listContent"></div></div></section>
+
+  <section id="accountPage" class="hidden">
+    <div class="grid">
+      <div class="card"><h2>تسجيل الدخول</h2>
+        <form onsubmit="doLogin(event)"><label>البريد الإلكتروني</label><input type="email" id="loginEmail" required autocomplete="username">
+          <label>كلمة المرور</label><input type="password" id="loginPassword" required autocomplete="current-password">
+          <button type="submit">دخول</button></form>
+      </div>
+      <div class="card"><h2>إنشاء حساب أهالي</h2>
+        <form onsubmit="doRegister(event)"><label>الاسم</label><input id="regName" required minlength="2">
+          <label>البريد الإلكتروني</label><input type="email" id="regEmail" required autocomplete="email">
+          <label>رقم الهاتف (اختياري)</label><input id="regPhone" type="tel" autocomplete="tel">
+          <label>كلمة المرور (10 أحرف على الأقل)</label><input type="password" id="regPassword" required minlength="10" autocomplete="new-password">
+          <button type="submit">إنشاء الحساب</button></form>
+      </div>
+    </div>
+  </section>
+
+  <section id="memberPage" class="hidden"><div class="card"><h2>حسابي</h2><div id="profileInfo"></div>
+    <h3>إرسال خبر أو اقتراح للمراجعة</h3>
+    <form onsubmit="submitSuggestion(event)"><label>نوع المشاركة</label><select id="suggestionType"><option value="news">خبر محلي</option><option value="service">خدمة أو مرفق</option><option value="correction">تصحيح معلومة</option><option value="other">اقتراح آخر</option></select>
+      <label>العنوان</label><input id="suggestionTitle" required><label>التفاصيل</label><textarea id="suggestionContent" required></textarea>
+      <label>وسيلة تواصل (اختياري)</label><input id="suggestionContact"><button type="submit">إرسال للمراجعة</button></form>
+    <h3>تقديم منشور لنواب المراغة</h3><p class="muted">كل منشور يخضع لموافقة مدير الموقع قبل النشر.</p>
+<form onsubmit="submitRepPost(event)"><label>عنوان المنشور</label><input id="repTitle" required><label>نص المنشور</label><textarea id="repContent" required></textarea><label>اسم المكتب أو وسيلة التحقق (اختياري)</label><input id="repContact"><button type="submit">إرسال للمراجعة</button></form>
+<button class="secondary" onclick="doLogout()">تسجيل الخروج</button>
+  </div></section>
+
+  <section id="adminPage" class="hidden">
+    <div class="card"><h2>لوحة الإدارة</h2><p class="muted">كل عمليات الإدارة تتحقق من صلاحية المدير على الخادم.</p>
+      <div class="row"><div><label>القسم</label><select id="adminTable">
+        <option value="News">الأخبار</option><option value="Categories">الأقسام</option><option value="MenuItems">قوائم الموقع والتفرعات</option><option value="Services">الخدمات</option>
+        <option value="Representatives">النواب</option><option value="Jobs">الوظائف</option><option value="Clinics">العيادات</option>
+        <option value="Hospitals">المستشفيات</option><option value="Pharmacies">الصيدليات</option><option value="UrbanPlanning">الحيز العمراني</option><option value="Submissions">مشاركات الأهالي</option><option value="Notifications">الإشعارات العامة</option><option value="DonationCampaigns">حملات التبرع</option><option value="DonationAccounts">حسابات التبرعات</option><option value="Comments">التعليقات</option>
+      </select></div><div class="actions" style="align-items:end"><button onclick="loadAdminRows()">عرض السجلات</button><button onclick="newRecord()" class="secondary">إضافة سجل جديد</button></div></div>
+      <div id="adminEditor" class="hidden"></div><div id="adminRows"></div>
+    </div>
+  </section>
+  <section id="donationsPage" class="hidden"><div class="card"><h2>التبرعات والمبادرات المجتمعية</h2><p class="muted">تحقق من الجهة المستفيدة قبل التحويل واحتفظ بالإيصال. الموقع لا يستلم الأموال بنفسه في هذه النسخة.</p><div id="donationCampaigns"></div><h3>حسابات ووسائل التبرع</h3><div id="donationAccounts"></div></div></section>
+<section id="notificationsPage" class="hidden"><div class="card"><h2>الإشعارات</h2><p class="muted">إشعارات داخل حسابك. إشعارات المتصفح الفورية تحتاج إذن المستخدم وإعدادًا إضافيًا.</p><div id="notificationsList"></div></div></section>
+<section id="morePage" class="hidden"><div class="grid">
+    <div class="card"><h3>النواب</h3><button onclick="renderList('Representatives','النواب')">عرض البيانات</button></div>
+    <div class="card"><h3>الحيز العمراني</h3><button onclick="renderList('UrbanPlanning','الحيز العمراني')">عرض المعلومات</button></div>
+    <div class="card"><h3>الصيدليات</h3><button onclick="renderList('Pharmacies','الصيدليات')">عرض الدليل</button></div>
+  </div></section>
+</main>
+<footer>أهله المراغة — منصة مجتمعية مستقلة. تحقق من المصادر الرسمية قبل الاعتماد على المعلومات المنشورة.</footer>
+
+<script>
+let token = sessionStorage.getItem("ah_token") || "";
+let currentUser = null;
+let publicData = {};
+let adminRows = [];
+const TABLE_FIELDS = {
+  News:[["title","عنوان الخبر"],["summary","ملخص"],["body","نص الخبر"],["imageUrl","رابط الصورة"],["category","القسم"],["status","الحالة"]],
+  Categories:[["name","اسم القسم"],["slug","الرابط المختصر"],["description","الوصف"],["status","الحالة"],["sortOrder","الترتيب"]],
+  MenuItems:[["label","اسم القائمة/الرابط"],["parentId","معرّف القائمة الأم (اتركه فارغًا للقائمة الرئيسية)"],["targetPage","الصفحة الداخلية: home أو news أو services أو jobs أو representatives أو donations أو notifications أو directory أو more"],["url","رابط خارجي اختياري (يُستخدم بدل الصفحة الداخلية)"],["status","الحالة: active أو inactive"],["sortOrder","الترتيب الرقمي"]],
+  Services:[["title","اسم الخدمة"],["description","الوصف"],["phone","الهاتف"],["address","العنوان"],["village","القرية"],["category","التصنيف"],["imageUrl","رابط الصورة"],["status","الحالة"]],
+  Representatives:[["name","الاسم"],["title","الصفة"],["partyOrRole","الدور/الانتماء"],["phone","الهاتف"],["officeAddress","عنوان المكتب"],["bio","نبذة"],["sourceUrl","المصدر"],["status","الحالة"]],
+  Jobs:[["title","المسمى الوظيفي"],["employer","جهة العمل"],["description","الوصف"],["requirements","الشروط"],["phone","للتواصل"],["address","المكان"],["deadline","آخر موعد"],["sourceUrl","المصدر"],["status","الحالة"]],
+  Clinics:[["name","اسم العيادة"],["doctor","الطبيب"],["specialty","التخصص"],["phone","الهاتف"],["address","العنوان"],["village","القرية"],["hours","المواعيد"],["sourceUrl","المصدر"],["status","الحالة"]],
+  Hospitals:[["name","اسم المستشفى"],["type","النوع"],["phone","الهاتف"],["address","العنوان"],["village","القرية"],["hours","المواعيد"],["sourceUrl","المصدر"],["status","الحالة"]],
+  Pharmacies:[["name","اسم الصيدلية"],["phone","الهاتف"],["address","العنوان"],["village","القرية"],["hours","المواعيد"],["sourceUrl","المصدر"],["status","الحالة"]],
+  UrbanPlanning:[["title","عنوان المعلومة"],["description","التفاصيل"],["village","القرية/المنطقة"],["documentUrl","رابط الوثيقة"],["sourceUrl","المصدر"]],
+  Submissions:[["type","النوع"],["title","العنوان"],["content","التفاصيل"],["contact","التواصل"],["status","الحالة"]],
+  Notifications:[["title","عنوان الإشعار"],["message","نص الإشعار"],["target","الجمهور: all أو member أو admin"],["postId","معرف المنشور"],["status","الحالة"]],
+  DonationCampaigns:[["title","اسم المبادرة"],["description","تفاصيل المبادرة"],["goalAmount","المبلغ المستهدف"],["raisedAmount","المبلغ المعلن جمعه"],["status","الحالة"]],
+  DonationAccounts:[["label","اسم وسيلة التبرع"],["provider","البنك/المحفظة"],["accountName","اسم صاحب الحساب"],["accountNumber","رقم الحساب أو المحفظة"],["instructions","تعليمات التبرع"],["status","الحالة"],["sortOrder","الترتيب"]],
+  Comments:[["status","الحالة"]]
+};
+function rpc(name,...args){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(e=>reject(new Error(e.message||String(e))))[name](...args);});}
+function showMessage(text,isError=false){const el=document.getElementById("message");el.textContent=text;el.className="notice"+(isError?" error":"");el.classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});setTimeout(()=>el.classList.add("hidden"),6000);}
+function hidePages(){["homePage","listPage","accountPage","memberPage","adminPage","morePage"].forEach(id=>document.getElementById(id).classList.add("hidden"));}
+function showPage(page){hidePages();const map={home:"homePage",news:"listPage",services:"listPage",directory:"listPage",jobs:"listPage",account:"accountPage",admin:"adminPage",more:"morePage",donations:"donationsPage",notifications:"notificationsPage",representatives:"listPage"};document.getElementById(map[page]||"homePage").classList.remove("hidden");
+ if(page==="home")renderHome();if(page==="news")renderList("News","الأخبار");if(page==="services")renderList("Services","الخدمات");if(page==="jobs")renderList("Jobs","الوظائف");if(page==="representatives")renderList("Representatives","نواب المراغة");if(page==="donations")renderDonations();if(page==="notifications")renderNotifications();if(page==="directory")renderMedical();if(page==="admin"){if(!currentUser||currentUser.role!=="admin"){showMessage("هذه الصفحة للمدير فقط.",true);showPage("account");}else loadAdminRows();}}
+function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+async function refreshPublic(){try{publicData=await rpc("getPublicData");document.getElementById("siteTitle").textContent=publicData.settings.siteName||"أهله المراغة";document.getElementById("tagline").textContent=publicData.settings.tagline||"دليلك للأخبار والخدمات في المراغة";renderDynamicMenus();renderHome();}catch(e){showMessage(e.message,true);}}
+function renderDynamicMenus(){
+ const all=(publicData.MenuItems||[]).filter(x=>x.status==="active"||x.status==="published").sort((a,b)=>(Number(a.sortOrder)||0)-(Number(b.sortOrder)||0));
+ const roots=all.filter(x=>!String(x.parentId||"").trim());
+ const host=document.getElementById("dynamicMenus");
+ host.innerHTML=roots.map(item=>{const children=all.filter(x=>String(x.parentId||"")===String(item.id));const label=escapeHtml(item.label||"قائمة");if(!children.length)return `<button onclick="openMenuItem('${escapeHtml(item.id)}')">${label}</button>`;return `<span class="nav-group"><button type="button" onclick="openMenuItem('${escapeHtml(item.id)}')">${label}</button><span class="nav-dropdown">${children.map(ch=>`<button type="button" onclick="openMenuItem('${escapeHtml(ch.id)}')">${escapeHtml(ch.label||"رابط")}</button>`).join("")}</span></span>`;}).join("");
+}
+function openMenuItem(id){const item=(publicData.MenuItems||[]).find(x=>String(x.id)===String(id));if(!item)return;if(item.url){window.open(item.url,"_blank","noopener,noreferrer");return;}const pages={home:"home",news:"news",services:"services",jobs:"jobs",representatives:"representatives",donations:"donations",notifications:"notifications",directory:"directory",more:"more"};const page=pages[String(item.targetPage||"").trim()];if(page)showPage(page);else showMessage("لم يتم تحديد صفحة أو رابط لهذه القائمة.",true);}
+function renderHome(){const items=(publicData.News||[]).filter(x=>x.status==="published");document.getElementById("homeNews").innerHTML=items.slice(0,6).map(x=>`<article class="card">${x.imageUrl?`<img src="${escapeHtml(x.imageUrl)}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px">`:""}<span class="pill">${escapeHtml(x.category||"أخبار")}</span><h3>${escapeHtml(x.title)}</h3><p>${escapeHtml(x.summary||"")}</p><div class="actions"><button onclick="reactToPost('${escapeHtml(x.id)}','like')">👍 تفاعل</button><button class="secondary" onclick="openComments('${escapeHtml(x.id)}')">💬 التعليقات</button></div><div id="interactions_${escapeHtml(x.id)}"></div></article>`).join("")||'<div class="card muted">لا توجد أخبار منشورة حتى الآن.</div>';}
+function renderList(table,title){document.getElementById("homePage").classList.add("hidden");document.getElementById("listPage").classList.remove("hidden");document.getElementById("listTitle").textContent=title;const rows=publicData[table]||[];document.getElementById("listContent").innerHTML=rows.map(r=>`<div class="item"><h3>${escapeHtml(r.title||r.name||r.doctor||"")}</h3><p>${escapeHtml(r.summary||r.description||r.bio||"")}</p><p class="muted">${escapeHtml(r.specialty||r.address||r.village||r.phone||"")}</p>${r.sourceUrl?`<a href="${escapeHtml(r.sourceUrl)}" target="_blank" rel="noopener">المصدر</a>`:""}</div>`).join("")||'<div class="empty">لا توجد بيانات منشورة في هذا القسم بعد.</div>';}
+function renderMedical(){document.getElementById("homePage").classList.add("hidden");document.getElementById("listPage").classList.remove("hidden");document.getElementById("listTitle").textContent="الدليل الطبي";const all=[["عيادات","Clinics"],["مستشفيات","Hospitals"],["صيدليات","Pharmacies"]];document.getElementById("listContent").innerHTML=all.map(([label,key])=>`<h3>${label}</h3>`+((publicData[key]||[]).map(r=>`<div class="item"><b>${escapeHtml(r.name||"")}</b> — ${escapeHtml(r.doctor||r.specialty||r.type||"")}<p>${escapeHtml(r.address||"")} ${escapeHtml(r.village||"")}</p><p>${escapeHtml(r.phone||"")} ${escapeHtml(r.hours||"")}</p></div>`).join("")||'<p class="muted">لا توجد بيانات منشورة.</p>')).join("");}
+function renderSearch(){const q=document.getElementById("searchBox").value.trim().toLowerCase();if(!q){renderHome();return;}const all=[];Object.keys(publicData).forEach(k=>{if(Array.isArray(publicData[k]))publicData[k].forEach(r=>{const str=Object.values(r).join(" ").toLowerCase();if(str.includes(q))all.push(r);});});document.getElementById("homeNews").innerHTML=all.slice(0,20).map(r=>`<div class="card"><h3>${escapeHtml(r.title||r.name||r.doctor||"نتيجة")}</h3><p>${escapeHtml(r.summary||r.description||r.address||"")}</p></div>`).join("")||'<div class="card">لا توجد نتائج مطابقة.</div>';}
+async function doLogin(e){e.preventDefault();try{const r=await rpc("login",{email:document.getElementById("loginEmail").value,password:document.getElementById("loginPassword").value});setSession(r);showMessage("تم تسجيل الدخول بنجاح.");showAccount();}catch(err){showMessage(err.message,true);}}
+async function doRegister(e){e.preventDefault();try{const r=await rpc("registerMember",{name:document.getElementById("regName").value,email:document.getElementById("regEmail").value,phone:document.getElementById("regPhone").value,password:document.getElementById("regPassword").value});setSession(r);showMessage("تم إنشاء حسابك بنجاح.");showAccount();}catch(err){showMessage(err.message,true);}}
+function setSession(r){token=r.token;currentUser=r.user;sessionStorage.setItem("ah_token",token);updateNav();}
+function updateNav(){document.getElementById("accountNav").textContent=currentUser?"حسابي":"دخول / حساب جديد";document.getElementById("adminNav").classList.toggle("hidden",!currentUser||currentUser.role!=="admin");}
+function showAccount(){hidePages();if(currentUser){document.getElementById("memberPage").classList.remove("hidden");document.getElementById("profileInfo").innerHTML=`<p><b>${escapeHtml(currentUser.name)}</b></p><p>${escapeHtml(currentUser.email)}</p><span class="pill">${currentUser.role==="admin"?"مدير":"عضو"}</span>`;}else document.getElementById("accountPage").classList.remove("hidden");}
+async function doLogout(){try{await rpc("logout",token);}catch(e){}token="";currentUser=null;sessionStorage.removeItem("ah_token");updateNav();showPage("home");showMessage("تم تسجيل الخروج.");}
+async function submitSuggestion(e){e.preventDefault();try{const r=await rpc("submitSuggestion",token,{type:document.getElementById("suggestionType").value,title:document.getElementById("suggestionTitle").value,content:document.getElementById("suggestionContent").value,contact:document.getElementById("suggestionContact").value});showMessage(r.message);e.target.reset();}catch(err){showMessage(err.message,true);}}
+async function loadAdminRows(){if(!currentUser||currentUser.role!=="admin")return;const table=document.getElementById("adminTable").value;try{adminRows=await rpc("adminAction",token,{action:"list",table});document.getElementById("adminEditor").classList.add("hidden");document.getElementById("adminRows").innerHTML=adminRows.map(r=>`<div class="item"><b>${escapeHtml(r.title||r.name||r.label||r.key||r.id)}</b> <span class="pill">${escapeHtml(r.status||"")}</span><p class="muted">${escapeHtml(r.summary||r.description||r.email||"")}</p><div class="actions"><button class="secondary" onclick="editRecord('${escapeHtml(r.id||"")}')">تعديل</button>${r.status?`<button class="secondary" onclick="changeStatus('${escapeHtml(r.id)}','${r.status==="published"?"hidden":"published"}')">${r.status==="published"?"إخفاء":"نشر"}</button>`:""}${r.type==="representative_post"&&r.status==="pending"?`<button onclick="approveRep('${escapeHtml(r.id)}','approve')">موافقة ونشر</button><button class="danger" onclick="approveRep('${escapeHtml(r.id)}','reject')">رفض</button>`:""}<button class="danger" onclick="deleteRecord('${escapeHtml(r.id||"")}')">حذف</button></div></div>`).join("")||'<p class="empty">لا توجد سجلات.</p>';}catch(e){showMessage(e.message,true);}}
+function newRecord(){editRecord("");}
+function editRecord(id){const table=document.getElementById("adminTable").value;const fields=TABLE_FIELDS[table]||[];const row=adminRows.find(r=>String(r.id)===String(id))||{};const el=document.getElementById("adminEditor");el.classList.remove("hidden");el.innerHTML=`<h3>${id?"تعديل سجل":"إضافة سجل"}</h3><form onsubmit="saveRecord(event,'${escapeHtml(id)}')"><input type="hidden" id="editId" value="${escapeHtml(id)}">${fields.map(([key,label])=>`<label>${label}</label>${["body","description","summary","bio","requirements","content"].includes(key)?`<textarea id="f_${key}">${escapeHtml(row[key]||"")}</textarea>`:`<input id="f_${key}" value="${escapeHtml(row[key]||"")}" ${key==="status"?"placeholder='draft أو published أو hidden'":""}>`}`).join("")}<div class="actions"><button type="submit">حفظ</button><button type="button" class="secondary" onclick="document.getElementById('adminEditor').classList.add('hidden')">إلغاء</button></div></form>`;el.scrollIntoView({behavior:"smooth"});}
+async function saveRecord(e,id){e.preventDefault();const table=document.getElementById("adminTable").value;const fields=TABLE_FIELDS[table]||[];const record={id:id};fields.forEach(([key])=>record[key]=document.getElementById("f_"+key).value);try{await rpc("adminAction",token,{action:"save",table,record});showMessage("تم حفظ السجل.");await loadAdminRows();await refreshPublic();}catch(err){showMessage(err.message,true);}}
+async function approveRep(id,decision){try{await rpc("approveRepresentativeSubmission",token,id,decision);showMessage(decision==="approve"?"تمت الموافقة والنشر.":"تم رفض الطلب.");await loadAdminRows();await refreshPublic();}catch(e){showMessage(e.message,true);}}
+async function changeStatus(id,status){try{await rpc("adminAction",token,{action:"setStatus",table:document.getElementById("adminTable").value,id,status});showMessage("تم تحديث الحالة.");await loadAdminRows();await refreshPublic();}catch(e){showMessage(e.message,true);}}
+async function deleteRecord(id){if(!id||!confirm("هل أنت متأكد من حذف هذا السجل؟"))return;try{await rpc("adminAction",token,{action:"delete",table:document.getElementById("adminTable").value,id});showMessage("تم الحذف.");await loadAdminRows();await refreshPublic();}catch(e){showMessage(e.message,true);}}
+
+async function reactToPost(postId,reaction){if(!currentUser){showMessage("سجّل الدخول للتفاعل.",true);showPage("account");return;}try{const r=await rpc("toggleReaction",token,{postId,reaction});const el=document.getElementById("interactions_"+postId);if(el)el.textContent="إجمالي التفاعلات: "+Object.values(r.interactions.reactions).reduce((a,b)=>a+b,0);showMessage("تم تحديث تفاعلك.");}catch(e){showMessage(e.message,true);}}
+async function openComments(postId){const el=document.getElementById("interactions_"+postId);if(!el)return;try{const r=await rpc("getPostInteractions",token,postId);el.innerHTML=`<p class="muted">التفاعلات: ${Object.values(r.reactions).reduce((a,b)=>a+b,0)} — التعليقات: ${r.comments.length}</p>`+r.comments.map(c=>`<div class="item"><b>${escapeHtml(c.userName)}</b><p>${escapeHtml(c.content)}</p></div>`).join("")+(currentUser?`<form onsubmit="postComment(event,'${escapeHtml(postId)}')"><textarea id="comment_${escapeHtml(postId)}" required placeholder="اكتب تعليقك"></textarea><button type="submit">إضافة تعليق</button></form>`:'<p>سجّل الدخول لإضافة تعليق.</p>');}catch(e){showMessage(e.message,true);}}
+async function postComment(e,postId){e.preventDefault();const input=document.getElementById("comment_"+postId);try{await rpc("addComment",token,{postId,content:input.value});showMessage("تم نشر التعليق.");openComments(postId);}catch(err){showMessage(err.message,true);}}
+function applyTheme(theme){const root=document.documentElement;const themes={green:{g:"#166534",g2:"#15803d",p:"#f4f7f4",i:"#17221b",l:"#dce5dd"},blue:{g:"#1d4ed8",g2:"#2563eb",p:"#f3f6fc",i:"#172033",l:"#dbe3f2"},warm:{g:"#9a3412",g2:"#c2410c",p:"#fff8f1",i:"#2b211b",l:"#f1dfd1"},dark:{g:"#15803d",g2:"#16a34a",p:"#111827",i:"#f3f4f6",l:"#374151"}};const t=themes[theme]||themes.green;root.style.setProperty("--green",t.g);root.style.setProperty("--green2",t.g2);root.style.setProperty("--paper",t.p);root.style.setProperty("--ink",t.i);root.style.setProperty("--line",t.l);try{localStorage.setItem("ah_theme",theme)}catch(e){}}
+function renderDonations(){const camps=(publicData.DonationCampaigns||[]).filter(x=>x.status==="published");const accts=(publicData.DonationAccounts||[]).filter(x=>x.status==="published"||x.status==="active");document.getElementById("donationCampaigns").innerHTML=camps.map(c=>`<div class="item"><h3>${escapeHtml(c.title)}</h3><p>${escapeHtml(c.description||"")}</p><p class="muted">المستهدف: ${escapeHtml(c.goalAmount||"غير محدد")} — المعلن جمعه: ${escapeHtml(c.raisedAmount||"غير معلن")}</p></div>`).join("")||'<p class="muted">لا توجد حملات تبرع معلنة حاليًا.</p>';document.getElementById("donationAccounts").innerHTML=accts.map(a=>`<div class="item"><h3>${escapeHtml(a.label||a.provider||"وسيلة تبرع")}</h3><p>${escapeHtml(a.provider||"")}</p><p><b>اسم الحساب:</b> ${escapeHtml(a.accountName||"")}</p><p><b>رقم الحساب/المحفظة:</b> ${escapeHtml(a.accountNumber||"")}</p><p>${escapeHtml(a.instructions||"")}</p></div>`).join("")||'<p class="muted">لم تتم إضافة حسابات تبرع بعد.</p>';}
+async function renderNotifications(){const el=document.getElementById("notificationsList");if(!currentUser){el.innerHTML='<p>سجّل الدخول لعرض إشعارات حسابك.</p>';return;}try{const rows=await rpc("getMyNotifications",token);el.innerHTML=rows.map(n=>`<div class="item"><h3>${escapeHtml(n.title)} ${n.read?"":'<span class="pill">جديد</span>'}</h3><p>${escapeHtml(n.message)}</p><p class="muted">${escapeHtml(n.createdAt||"")}</p>${n.read?"":`<button class="secondary" onclick="readNotification('${escapeHtml(n.id)}')">تحديد كمقروء</button>`}</div>`).join("")||'<p class="muted">لا توجد إشعارات.</p>';}catch(e){el.textContent=e.message;}}
+async function readNotification(id){try{await rpc("markNotificationRead",token,id);renderNotifications();}catch(e){showMessage(e.message,true);}}
+async function submitRepPost(e){e.preventDefault();try{const r=await rpc("submitRepresentativePost",token,{title:document.getElementById("repTitle").value,content:document.getElementById("repContent").value,contact:document.getElementById("repContact").value});showMessage(r.message);e.target.reset();}catch(err){showMessage(err.message,true);}}
+
+async function init(){try{applyTheme(localStorage.getItem("ah_theme")||"green")}catch(e){applyTheme("green")}await refreshPublic();updateNav();if(token){try{currentUser=await rpc("getMyProfile",token);updateNav();}catch(e){token="";sessionStorage.removeItem("ah_token");}}}
+init();
+</script>
+</body>
+</html>
